@@ -159,6 +159,7 @@ export class BookTab extends BaseTab {
     color: AnnotationColor,
     text: string,
     notes?: string,
+    nostrEventId?: string,
   ) {
     const spine = this.section
     if (!spine?.navitem) return
@@ -182,6 +183,7 @@ export class BookTab extends BaseTab {
         color,
         notes,
         text,
+        nostrEventId,
       }
 
       this.updateBook({
@@ -196,6 +198,7 @@ export class BookTab extends BaseTab {
         color,
         notes,
         text,
+        nostrEventId,
       }
       this.book.annotations.splice(i, 1, annotation)
       this.updateBook({

@@ -284,7 +284,22 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
                 }
                 
                 console.log('Posting highlight with metadata:', bookMetadata)
-                postHighlight(text, range, bookMetadata)
+                
+                // Post to Nostr and create local annotation
+                postHighlight(text, range, bookMetadata).then((eventId) => {
+                  if (eventId) {
+                    // Create local annotation with Nostr event ID
+                    tab.putAnnotation(
+                      'highlight',
+                      cfi,
+                      'yellow', // default color
+                      text,
+                      undefined, // no notes for direct posting
+                      eventId // nostr event ID
+                    )
+                    hide()
+                  }
+                })
               }}
             />
           </div>
@@ -368,7 +383,20 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
                 }
                 
                 // Post to Nostr with user notes as comment tag
-                postHighlight(text, range, bookMetadata, ref.current?.value)
+                postHighlight(text, range, bookMetadata, ref.current?.value).then((eventId) => {
+                  if (eventId) {
+                    // Create local annotation with Nostr event ID
+                    tab.putAnnotation(
+                      annotation?.type ?? 'highlight',
+                      cfi,
+                      annotation?.color ?? 'yellow',
+                      text,
+                      ref.current?.value,
+                      eventId
+                    )
+                    hide()
+                  }
+                })
               }}
             >
               {isPosting ? 'Posting...' : t('post_to_nostr')}
