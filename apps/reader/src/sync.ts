@@ -5,6 +5,7 @@ import { parseCookies } from 'nookies'
 
 import { BookRecord, db } from './db'
 import { readBlob } from './file'
+import { nostrAuth } from './nostr'
 
 export const mapToToken = {
   dropbox: 'dropbox-refresh-token',
@@ -68,11 +69,30 @@ function deserializeData(text: string) {
 }
 
 export async function uploadData(books: BookRecord[]) {
+  // Try nostr first if available
+  if (nostrAuth.isLoggedIn()) {
+    try {
+      const data = serializeData(books)
+      const eventId = await nostrAuth.publishEvent(30023, data, [
+        ['d', 'flow-backup'],
+        ['t', 'backup'],
+        ['t', 'flow']
+      ])
+      if (eventId) {
+        console.log('Data uploaded to nostr:', eventId)
+        return { success: true, method: 'nostr', eventId }
+      }
+    } catch (error) {
+      console.error('Nostr upload failed, falling back to Dropbox:', error)
+    }
+  }
+
+  // Fallback to Dropbox
   return dbx.filesUpload({
     path: `/${DATA_FILENAME}`,
     mode: { '.tag': 'overwrite' },
     contents: serializeData(books),
-  })
+  }).then(result => ({ success: true, method: 'dropbox', result }))
 }
 
 export const dropboxFilesFetcher = (path: string) => {

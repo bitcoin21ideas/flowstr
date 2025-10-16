@@ -9,14 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@github/mini-throttle": "2.1.0",
     "@flow/epubjs": "workspace:*",
     "@flow/internal": "workspace:*",
+    "@github/mini-throttle": "2.1.0",
     "@literal-ui/core": "0.0.13",
     "@literal-ui/hooks": "0.0.8",
     "@literal-ui/next": "0.0.3",
     "@material/material-color-utilities": "0.2.0",
     "@next/bundle-analyzer": "12.1.6",
+    "@nostr-dev-kit/ndk": "2.17.9",
     "@sentry/nextjs": "7.12.1",
     "@types/react-highlight-words": "0.16.4",
     "babel-loader": "8.2.5",
