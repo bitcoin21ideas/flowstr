@@ -15,6 +15,7 @@ import { dbx, mapToToken, OAUTH_SUCCESS_MESSAGE } from '@flow/reader/sync'
 import { Button } from '../Button'
 import { Checkbox, Select } from '../Form'
 import { Page } from '../Page'
+import { NostrLogin } from '../NostrLogin'
 
 export const Settings: React.FC = () => {
   const { scheme, setScheme } = useColorScheme()
@@ -62,6 +63,9 @@ export const Settings: React.FC = () => {
           />
         </Item>
         <Synchronization />
+        <Item title="Nostr Authentication">
+          <NostrLogin />
+        </Item>
         <Item title={t('cache')}>
           <Button
             variant="secondary"
