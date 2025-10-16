@@ -9,6 +9,7 @@ import {
   MdOutlineIndeterminateCheckBox,
   MdSearch,
 } from 'react-icons/md'
+import { MdShare } from 'react-icons/md'
 import { useSnapshot } from 'valtio'
 
 import { typeMap, colorMap } from '../annotation'
@@ -20,6 +21,7 @@ import {
   useTranslation,
   useTypography,
 } from '../hooks'
+import { useNostrHighlight } from '../hooks/useNostrHighlight'
 import { BookTab } from '../models'
 import { isTouchScreen, scale } from '../platform'
 import { useSettings } from '../state'
@@ -130,6 +132,16 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
   const [height, setHeight] = useState(0)
   const mobile = useMobile()
   const t = useTranslation('menu')
+  
+  const { postHighlight, isPosting, isLoggedIn } = useNostrHighlight({
+    onSuccess: (eventId) => {
+      console.log('Highlight posted to Nostr:', eventId)
+      hide()
+    },
+    onError: (error) => {
+      console.error('Failed to post highlight:', error)
+    }
+  })
 
   const cfi = tab.rangeToCfi(range)
   const annotation = tab.book.annotations.find((a) => a.cfi === cfi)
@@ -251,6 +263,30 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
                 }}
               />
             )}
+            <IconButton
+              title={isLoggedIn ? t('post_to_nostr') : t('nostr_login_required')}
+              Icon={MdShare}
+              size={ICON_SIZE}
+              disabled={isPosting}
+              onClick={() => {
+                console.log('Nostr button clicked', { isLoggedIn, isPosting, text: text.substring(0, 50) })
+                
+                if (!isLoggedIn) {
+                  // TODO: Show login modal or redirect to settings
+                  console.log('User needs to login to Nostr first')
+                  alert('Please login to Nostr first. Go to Settings to authenticate.')
+                  return
+                }
+                
+                const bookMetadata = {
+                  title: tab.book.metadata.title || 'Untitled',
+                  creator: tab.book.metadata.creator || 'Unknown Author'
+                }
+                
+                console.log('Posting highlight with metadata:', bookMetadata)
+                postHighlight(text, range, bookMetadata)
+              }}
+            />
           </div>
         )}
         <div className="space-y-2">
@@ -287,7 +323,7 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
           ))}
         </div>
         {annotate && (
-          <div className="mt-3 flex">
+          <div className="mt-3 flex gap-2">
             {annotation && (
               <Button
                 compact
@@ -315,6 +351,27 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
               }}
             >
               {t(annotation ? 'update' : 'create')}
+            </Button>
+            <Button
+              compact
+              variant="secondary"
+              disabled={isPosting}
+              onClick={() => {
+                if (!isLoggedIn) {
+                  alert('Please login to Nostr first. Go to Settings to authenticate.')
+                  return
+                }
+                
+                const bookMetadata = {
+                  title: tab.book.metadata.title || 'Untitled',
+                  creator: tab.book.metadata.creator || 'Unknown Author'
+                }
+                
+                // Post to Nostr with user notes as comment tag
+                postHighlight(text, range, bookMetadata, ref.current?.value)
+              }}
+            >
+              {isPosting ? 'Posting...' : t('post_to_nostr')}
             </Button>
           </div>
         )}

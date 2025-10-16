@@ -198,13 +198,71 @@ export class NostrAuth {
       
       await this.connect()
       
-      // For now, just log the event - full publishing can be implemented later
-      console.log('Publishing nostr event:', { kind, content, tags })
+      const { NDKEvent } = await import('@nostr-dev-kit/ndk')
+      const event = new NDKEvent(this.ndk)
       
-      // Return a mock event ID for now
-      return `nostr_event_${Date.now()}`
+      event.kind = kind
+      event.content = content
+      event.tags = tags
+      
+      await event.publish()
+      return event.id
     } catch (error) {
       console.error('Failed to publish event:', error)
+      return null
+    }
+  }
+
+  async publishHighlight(
+    highlightText: string,
+    bookTitle: string,
+    bookAuthor: string,
+    context?: string,
+    comment?: string
+  ): Promise<string | null> {
+    try {
+      console.log('publishHighlight called with:', { highlightText: highlightText.substring(0, 50), bookTitle, bookAuthor, context: context?.substring(0, 50), comment: comment?.substring(0, 50) })
+      
+      if (!this.isLoggedIn()) {
+        console.log('User not logged in, returning null')
+        return null
+      }
+      
+      console.log('Connecting to NDK...')
+      await this.connect()
+      
+      console.log('Importing NDKEvent...')
+      const { NDKEvent } = await import('@nostr-dev-kit/ndk')
+      const event = new NDKEvent(this.ndk)
+      
+      event.kind = 9802 // NIP-84 highlight kind
+      event.content = highlightText
+      
+      // Build NIP-84 compliant tags
+      const tags: string[][] = [
+        ['context', 'book', bookTitle, bookAuthor],
+        ['author', bookAuthor],
+        ['title', bookTitle]
+      ]
+      
+      // Add context if provided
+      if (context && context.trim()) {
+        tags.push(['context', context.trim()])
+      }
+      
+      // Add comment if provided (NIP-84 comment tag)
+      if (comment && comment.trim()) {
+        tags.push(['comment', comment.trim()])
+      }
+      
+      event.tags = tags
+      
+      console.log('Publishing event with tags:', tags)
+      await event.publish()
+      console.log('Event published successfully, ID:', event.id)
+      return event.id
+    } catch (error) {
+      console.error('Failed to publish highlight:', error)
       return null
     }
   }

@@ -36,4 +36,5 @@ export interface Annotation {
   color: AnnotationColor
   notes?: string
   text: string
+  nostrEventId?: string
 }

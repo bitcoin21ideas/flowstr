@@ -65,6 +65,9 @@ export default {
   'menu.create': 'Create',
   'menu.delete': 'Delete',
   'menu.update': 'Update',
+  'menu.post_to_nostr': 'Post to Nostr',
+  'menu.posted_to_nostr': 'Posted to Nostr',
+  'menu.nostr_login_required': 'Login to Nostr to post highlights',
 
   'action.expand_all': 'Expand All',
   'action.collapse_all': 'Collapse All',
@@ -72,6 +75,9 @@ export default {
   'action.clear': 'Clear',
   'action.step_down': 'Step Down',
   'action.step_up': 'Step Up',
+
+  'notifications.highlight_posted': 'Highlight posted to Nostr successfully',
+  'notifications.highlight_post_failed': 'Failed to post highlight to Nostr',
 
   untitled: 'Untitled',
 } as const
