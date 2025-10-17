@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Button } from './Button'
-import { nostrAuth, LoginMethod } from '../nostr'
+
 import { useForceRender } from '../hooks/useForceRender'
+import { nostrAuth, LoginMethod } from '../nostr'
+
+import { Button } from './Button'
 
 interface NostrLoginProps {
   onLogin?: () => void

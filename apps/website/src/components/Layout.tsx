@@ -24,7 +24,7 @@ export const OpenApp: React.FC<ComponentProps<'a'>> = ({
   const { t } = useTranslation()
   return (
     <Link
-      href={process.env.NEXT_PUBLIC_APP_URL!}
+      href={process.env.NEXT_PUBLIC_APP_URL || 'https://reader.flowoss.com'}
       className={clsx(
         'typescale-title-medium select-none bg-black px-4 py-3 text-center text-white',
         className,

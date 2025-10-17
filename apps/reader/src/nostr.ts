@@ -1,6 +1,5 @@
 import NDK from '@nostr-dev-kit/ndk'
 import { NDKPrivateKeySigner, NDKNip07Signer, NDKNip46Signer } from '@nostr-dev-kit/ndk'
-import { parseCookies, destroyCookie } from 'nookies'
 
 // Initialize NDK with AI guardrails enabled
 const ndk = new NDK({ 

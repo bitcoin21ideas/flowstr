@@ -1,15 +1,14 @@
 import { useBoolean } from '@literal-ui/hooks'
-import React, { Fragment } from 'react'
-import { useMemo } from 'react'
-import { VscCopy } from 'react-icons/vsc'
+import React, { Fragment, useMemo } from 'react'
 import { MdShare } from 'react-icons/md'
+import { VscCopy } from 'react-icons/vsc'
 
 import { Annotation } from '@flow/reader/annotation'
 import { useTranslation } from '@flow/reader/hooks'
 import { reader, useReaderSnapshot } from '@flow/reader/models'
 import { copy, group, keys } from '@flow/reader/utils'
-import { useNostrHighlight } from '../../hooks/useNostrHighlight'
 
+import { useNostrHighlight } from '../../hooks/useNostrHighlight'
 import { Row } from '../Row'
 import { PaneViewProps, PaneView, Pane } from '../base'
 
@@ -148,17 +147,34 @@ const AnnotationRow: React.FC<AnnotationRowProps> = ({ annotation }) => {
   const { postHighlight, isPosting, isLoggedIn } = useNostrHighlight({
     onSuccess: (eventId) => {
       console.log('Highlight posted to Nostr:', eventId)
-      // Update the annotation with the Nostr event ID
-      if (focusedBookTab) {
-        const annotationIndex = focusedBookTab.book.annotations.findIndex(a => a.id === annotation.id)
-        if (annotationIndex !== -1) {
-          const updatedAnnotation = {
-            ...focusedBookTab.book.annotations[annotationIndex],
-            nostrEventId: eventId
-          }
-          focusedBookTab.book.annotations[annotationIndex] = updatedAnnotation
-        }
-      }
+             // Update the annotation with the Nostr event ID
+             if (focusedBookTab) {
+               const annotationIndex = focusedBookTab.book.annotations.findIndex(a => a.id === annotation.id)
+               if (annotationIndex !== -1) {
+                 const existingAnnotation = focusedBookTab.book.annotations[annotationIndex]
+                 if (existingAnnotation) {
+                   const updatedAnnotation: Annotation = {
+                     id: existingAnnotation.id,
+                     bookId: existingAnnotation.bookId,
+                     cfi: existingAnnotation.cfi,
+                     spine: existingAnnotation.spine,
+                     createAt: existingAnnotation.createAt,
+                     updatedAt: existingAnnotation.updatedAt,
+                     type: existingAnnotation.type,
+                     color: existingAnnotation.color,
+                     notes: existingAnnotation.notes,
+                     text: existingAnnotation.text,
+                     nostrEventId: eventId
+                   }
+                   // Create a new annotations array with the updated annotation
+                   const newAnnotations = [...focusedBookTab.book.annotations]
+                   newAnnotations[annotationIndex] = updatedAnnotation
+                   focusedBookTab.updateBook({
+                     annotations: newAnnotations
+                   })
+                 }
+               }
+             }
     },
     onError: (error) => {
       console.error('Failed to post highlight:', error)
@@ -182,7 +198,7 @@ const AnnotationRow: React.FC<AnnotationRowProps> = ({ annotation }) => {
       startOffset: 0,
       endOffset: annotation.text.length,
       commonAncestorContainer: document.body
-    } as Range
+    } as unknown as Range
     
     postHighlight(annotation.text, mockRange, bookMetadata)
   }
